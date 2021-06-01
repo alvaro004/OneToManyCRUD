@@ -31,6 +31,10 @@ public class VistaCargarArbitros extends javax.swing.JInternalFrame {
         em = null;
         emf = Persistence.createEntityManagerFactory("C:/base/PartidoOneToMany.odb");
         em = emf.createEntityManager();
+        
+        
+        TextPrompt placeholder1 = new TextPrompt("Ingrese el Id del Arbitro", idArbitroText);
+        TextPrompt placeholder2 = new TextPrompt("Ingrese el nombre del Arbitro", nombreArbitroText);
 
         actualizar.setEnabled(false);
         borrar.setEnabled(false);
@@ -39,15 +43,44 @@ public class VistaCargarArbitros extends javax.swing.JInternalFrame {
     
     public void listarArbitros() {
         
-        Query consultaArbitros = em.createQuery("SELECT arbitro FROM Arbitro arbitro");
-        List<Arbitro> ResultadosArbitro = consultaArbitros.getResultList();
-        DefaultTableModel modelo = (DefaultTableModel) tableArbitro.getModel();
-        modelo.setRowCount(0);
+        try {
+            Query consultaArbitros = em.createQuery("SELECT arbitro FROM Arbitro arbitro");
+            List<Arbitro> ResultadosArbitro = consultaArbitros.getResultList();
+            DefaultTableModel modelo = (DefaultTableModel) tableArbitro.getModel();
+            modelo.setRowCount(0);
         
-        for (Arbitro a : ResultadosArbitro) {
-            modelo.addRow(new Object[]{a.getIdArbitro(), a.getNombreArbitro()});
+            for (Arbitro a : ResultadosArbitro) {
+                modelo.addRow(new Object[]{a.getIdArbitro(), a.getNombreArbitro()});
+            }
+        } catch (Exception e) {
+            System.out.println(e);
         }
-
+        
+    }
+    
+    public Arbitro getDatosArbitro(){
+        
+        
+        String idequipo = idArbitroText.getText();
+        String nombre = nombreArbitroText.getText();
+        
+        Arbitro arbitro = new Arbitro(idequipo, nombre);
+        
+    
+        return arbitro;
+    }
+    
+    public void setArbitroForm(String idArbitro, String nombreArbitro){
+    
+        idArbitroText.setText(idArbitro);
+        nombreArbitroText.setText(nombreArbitro);
+        
+    }
+    
+    public Object getFilaArbitro(){
+        int fila = tableArbitro.getSelectedRow();
+        Object id = tableArbitro.getValueAt(fila, 0);
+        return id;       
     }
 
     /**
@@ -185,17 +218,15 @@ public class VistaCargarArbitros extends javax.swing.JInternalFrame {
 
     private void guardarMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_guardarMouseClicked
         // TODO add your handling code here:
-
-        String idequipo = idArbitroText.getText();
-        String nombre = nombreArbitroText.getText();
-
-        Arbitro arbitro = new Arbitro(idequipo, nombre);
+        //SE EXTRAEN LOS DATOS DEL FORMULARIO POR MEDIO DE ESTE METODO QUE DECUELVE UN OBJETO CON LOS DATOSS
+        Arbitro arbitro = getDatosArbitro();
+        
         em.getTransaction().begin();
         em.persist(arbitro);
         em.getTransaction().commit();
+        
+        setArbitroForm("","");
 
-        idArbitroText.setText("");
-        nombreArbitroText.setText("");
         JOptionPane.showMessageDialog(rootPane, "Guardado Exitoso");
 
         listarArbitros();
@@ -203,30 +234,29 @@ public class VistaCargarArbitros extends javax.swing.JInternalFrame {
 
     private void actualizarMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_actualizarMouseClicked
         // TODO add your handling code here:
-
-        int fila = tableArbitro.getSelectedRow();
-        Object id = tableArbitro.getValueAt(fila, 0);
-
+        
+        //SE TRAE EL ID DE LA FILA SELECCIONADA POR MEDIO DEL METODO
+        Object id = getFilaArbitro();
+        
         Arbitro arbitro = em.find(Arbitro.class, id);
+        
+        Arbitro arbitroDatos = getDatosArbitro();
 
-        String idequipo = idArbitroText.getText();
-        String nombre = nombreArbitroText.getText();
-
-        arbitro.setNombreArbitro(nombre);
-
+        //ENVIAMOS EL NUEVO VALOR AL OBJETO AARBITRO POR MEDIO DE SU SETTER
+        arbitro.setNombreArbitro(arbitroDatos.getNombreArbitro());
 
         em.getTransaction().begin();
         em.persist(arbitro);
         em.getTransaction().commit();
 
-        idArbitroText.setText("");
-        nombreArbitroText.setText("");
+        //VACIAR LOS CAMPOS DEL FORMULARIO 
+        setArbitroForm("", "");
+
         idArbitroText.setEnabled(true);
         
         guardar.setEnabled(true);
         borrar.setEnabled(false);
         actualizar.setEnabled(false);
-
 
         JOptionPane.showMessageDialog(rootPane, "Actualizado Exitoso");
 
@@ -239,9 +269,8 @@ public class VistaCargarArbitros extends javax.swing.JInternalFrame {
 
     private void borrarMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_borrarMouseClicked
         // TODO add your handling code here:
-        int fila = tableArbitro.getSelectedRow();
-        Object id = tableArbitro.getValueAt(fila, 0);
-
+        
+        Object id = getFilaArbitro();
         Arbitro arbitro = em.find(Arbitro.class, id);
        
         em.getTransaction().begin();
@@ -250,11 +279,9 @@ public class VistaCargarArbitros extends javax.swing.JInternalFrame {
 
         JOptionPane.showMessageDialog(rootPane, "Borrado Exitoso");
 
-        idArbitroText.setText("");
-        nombreArbitroText.setText("");
-        
-        idArbitroText.setEnabled(true);
+        setArbitroForm("", "");
 
+        idArbitroText.setEnabled(true);
 
         guardar.setEnabled(true);
         borrar.setEnabled(false);
@@ -265,31 +292,29 @@ public class VistaCargarArbitros extends javax.swing.JInternalFrame {
 
     private void cancelarMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_cancelarMouseClicked
         // TODO add your handling code here:
-        idArbitroText.setText("");
-        nombreArbitroText.setText("");
 
+        //VACIAR LOS CAMPOS DEL FORMULARIO 
+        setArbitroForm("", "");
+
+        //HABILITAR EL CAMPO DEL ID
         idArbitroText.setEnabled(true);
 
         guardar.setEnabled(true);
         borrar.setEnabled(false);
         actualizar.setEnabled(false);
-        listarArbitros();
+        
     }//GEN-LAST:event_cancelarMouseClicked
 
     private void tableArbitroMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_tableArbitroMouseClicked
         // TODO add your handling code here:
-        int fila = tableArbitro.getSelectedRow();
-        Object id = tableArbitro.getValueAt(fila, 0);
-
-        Arbitro arbitro = em.find(Arbitro.class, id);
-
         idArbitroText.setEnabled(false);
         
-        String idArbitro = arbitro.getIdArbitro();
-        String nombreArbitro = arbitro.getNombreArbitro();
+        Object id = getFilaArbitro();
+        
 
-        idArbitroText.setText(idArbitro);
-        nombreArbitroText.setText(nombreArbitro);
+        Arbitro arbitro = em.find(Arbitro.class, id);
+        
+        setArbitroForm(arbitro.getIdArbitro(),arbitro.getNombreArbitro());
 
         guardar.setEnabled(false);
         borrar.setEnabled(true);

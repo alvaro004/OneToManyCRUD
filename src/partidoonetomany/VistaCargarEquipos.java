@@ -33,6 +33,8 @@ public class VistaCargarEquipos extends javax.swing.JInternalFrame {
         emf = Persistence.createEntityManagerFactory("C:/base/PartidoOneToMany.odb");
         em = emf.createEntityManager();
         
+        TextPrompt placeholder1 = new TextPrompt("Ingrese el Id del Equipo", idEquipo);
+        TextPrompt placeholder2 = new TextPrompt("Ingrese el nombre del Equipo", nombreEquipo);
         
         
         actualizar.setEnabled(false);
@@ -53,6 +55,30 @@ public class VistaCargarEquipos extends javax.swing.JInternalFrame {
             modelo.addRow(new Object[]{e.getIdEquipo(),e.getNombreEquipo(),});
         }
 
+    }
+    public Equipo getDatos(){
+        
+        
+        String idequipo = idEquipo.getText();
+        String nombre = nombreEquipo.getText();
+        
+        Equipo equipo = new Equipo(idequipo, nombre);
+        
+    
+        return equipo;
+    }
+    
+    public void setForm(String idEquipo, String nombreEquipo){
+    
+        this.idEquipo.setText(idEquipo);
+        this.nombreEquipo.setText(nombreEquipo);
+        
+    }
+    
+    public Object getFilaTable(){
+        int fila = tableEquipo.getSelectedRow();
+        Object id = tableEquipo.getValueAt(fila, 0);
+        return id;       
     }
 
     /**
@@ -180,52 +206,45 @@ public class VistaCargarEquipos extends javax.swing.JInternalFrame {
             
     private void guardarMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_guardarMouseClicked
         // TODO add your handling code here:
-        
-        String idequipo = idEquipo.getText();
-        String nombre = nombreEquipo.getText();
+        try {                  
+            //SE EXTRAEN LOS DATOS DEL FORMULARIO POR MEDIO DE ESTE METODO QUE DECUELVE UN OBJETO CON LOS DATOSS
+            Equipo equipo1 = getDatos();        
 
-        Equipo equipo1 = new Equipo(idequipo, nombre); 
-        em.getTransaction().begin();
-        em.persist(equipo1);
-        em.getTransaction().commit();
-        
-        idEquipo.setText("");
-        nombreEquipo.setText("");
-        JOptionPane.showMessageDialog(rootPane, "Guardado Exitoso");      
+            //Equipo equipo1 = new Equipo(idequipo, nombre); 
+            em.getTransaction().begin();
+            em.persist(equipo1);
+            em.getTransaction().commit();
 
-        listarEquipo();
+            //VACIAMOS LOS CAMPOS
+            setForm("", "");
+
+            JOptionPane.showMessageDialog(rootPane, "Guardado Exitoso");      
+            listarEquipo();
+            
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(rootPane, "Error al guardar: ");           
+        }
+
     }//GEN-LAST:event_guardarMouseClicked
 
     private void tableEquipoMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_tableEquipoMouseClicked
-        // TODO add your handling code here:
-        int fila = tableEquipo.getSelectedRow();
-        Object id = tableEquipo.getValueAt(fila, 0);
+        idEquipo.setEnabled(false);
+        //SE BUSCA EL ID DE LA FILA SELECIONANDA LLAMANDO A ESTE METODO
+        Object id = getFilaTable();        
         
         Equipo equipo = em.find(Equipo.class, id);
         
-        idEquipo.setEnabled(false);
-        
-        String idequipo = equipo.getIdEquipo();
-        String nombreequipo = equipo.getNombreEquipo();
-        
-        idEquipo.setText(idequipo);
-        nombreEquipo.setText(nombreequipo);
+        //ENVIAMOS LOS DATOS DE EQUIPO AL FORM
+        setForm(equipo.getIdEquipo(),equipo.getNombreEquipo());
         
         guardar.setEnabled(false);
         borrar.setEnabled(true);
         actualizar.setEnabled(true);
-
-        
-               
-        
-        
-        
     }//GEN-LAST:event_tableEquipoMouseClicked
 
     private void cancelarMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_cancelarMouseClicked
-        // TODO add your handling code here:
-        idEquipo.setText("");
-        nombreEquipo.setText("");
+        //VACIAMOS LOS CAMPOS
+        setForm("", "");
         
         idEquipo.setEnabled(true);
         
@@ -233,65 +252,61 @@ public class VistaCargarEquipos extends javax.swing.JInternalFrame {
         borrar.setEnabled(false);
         actualizar.setEnabled(false);
         listarEquipo();
-
     }//GEN-LAST:event_cancelarMouseClicked
 
     private void actualizarMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_actualizarMouseClicked
-        // TODO add your handling code here:
-        
-        int fila = tableEquipo.getSelectedRow();
-        Object id = tableEquipo.getValueAt(fila, 0);
-        
-        Equipo equipo1 = em.find(Equipo.class, id);
-        
-        String idequipo = idEquipo.getText();
-        String nombre = nombreEquipo.getText(); 
-        
-        equipo1.setIdEquipo(idequipo);
-        equipo1.setNombreEquipo(nombre);
-        
-        em.getTransaction().begin();
-        em.persist(equipo1);
-        em.getTransaction().commit();
-        
-        idEquipo.setText("");
-        nombreEquipo.setText("");
-        idEquipo.setEnabled(true);
-        
-        guardar.setEnabled(true);
-        borrar.setEnabled(false);
-        actualizar.setEnabled(false);
+        try {
+            //SE BUSCA EL ID DE LA FILA SELECIONANDA LLAMANDO A ESTE METODO
+            Object id = getFilaTable();  
+            //SE ENCUENTRA EL OBJETO DESEADO Y SE GUARDA EN EL TIPO DE DATO DEL OBJETO
+            Equipo equipo = em.find(Equipo.class, id);
+            //SE TRAEN LOS DATOS DEL FORMULARIO Y SE GUARDAN EN UN OBJETO DEL MISMO TIPO
+            Equipo equipo1 = getDatos(); 
+            //SE MODIFICA EL VALOR DEL ATRIBUTO DEL OBJETO
+            equipo.setNombreEquipo(equipo1.getNombreEquipo());
+            //SE GUARDA EL OBJETO MODIFICADO
+            em.getTransaction().begin();
+            em.persist(equipo);
+            em.getTransaction().commit();
+            //SE VACIA EL FORM
+            setForm("", "");
+            idEquipo.setEnabled(true);
 
-        
-        JOptionPane.showMessageDialog(rootPane, "Actualizado Exitoso");      
+            guardar.setEnabled(true);
+            borrar.setEnabled(false);
+            actualizar.setEnabled(false);
 
-        listarEquipo();
+            JOptionPane.showMessageDialog(rootPane, "Actualizado Exitoso");      
 
+            listarEquipo();          
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(rootPane, "Error al Actualizar: "); 
+        }
     }//GEN-LAST:event_actualizarMouseClicked
 
     private void borrarMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_borrarMouseClicked
-        // TODO add your handling code here:
-        int fila = tableEquipo.getSelectedRow();
-        Object id = tableEquipo.getValueAt(fila, 0);
-        
-        Equipo equipo1 = em.find(Equipo.class, id);        
-        em.getTransaction().begin();
-        em.remove(equipo1);
-        em.getTransaction().commit();
+        try {
+            Object id = getFilaTable();
 
-        JOptionPane.showMessageDialog(rootPane, "Borrado Exitoso");      
-        
-        idEquipo.setText("");
-        nombreEquipo.setText("");
-        
-        idEquipo.setEnabled(true);
+            Equipo equipo1 = em.find(Equipo.class, id);        
+            em.getTransaction().begin();
+            em.remove(equipo1);
+            em.getTransaction().commit();
 
-        guardar.setEnabled(true);
-        borrar.setEnabled(false);
-        actualizar.setEnabled(false);
-        
-        listarEquipo();
+            setForm("", "");
+            JOptionPane.showMessageDialog(rootPane, "Borrado Exitoso");      
 
+            idEquipo.setEnabled(true);
+
+            guardar.setEnabled(true);
+            borrar.setEnabled(false);
+            actualizar.setEnabled(false);
+
+            listarEquipo();
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(rootPane, "Error al Borrar: "); 
+        }
+          
     }//GEN-LAST:event_borrarMouseClicked
 
 
