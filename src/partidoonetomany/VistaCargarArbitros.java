@@ -53,25 +53,20 @@ public class VistaCargarArbitros extends javax.swing.JInternalFrame {
                 modelo.addRow(new Object[]{a.getIdArbitro(), a.getNombreArbitro()});
             }
         } catch (Exception e) {
-            System.out.println(e);
-        }
-        
+            JOptionPane.showMessageDialog(rootPane, e); 
+        }   
     }
     
-    public Arbitro getDatosArbitro(){
-        
-        
+    public Arbitro getDatosArbitro(){ 
         String idequipo = idArbitroText.getText();
         String nombre = nombreArbitroText.getText();
         
         Arbitro arbitro = new Arbitro(idequipo, nombre);
         
-    
         return arbitro;
     }
     
     public void setArbitroForm(String idArbitro, String nombreArbitro){
-    
         idArbitroText.setText(idArbitro);
         nombreArbitroText.setText(nombreArbitro);
         
@@ -217,50 +212,56 @@ public class VistaCargarArbitros extends javax.swing.JInternalFrame {
     }//GEN-LAST:event_nombreArbitroTextActionPerformed
 
     private void guardarMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_guardarMouseClicked
-        // TODO add your handling code here:
-        //SE EXTRAEN LOS DATOS DEL FORMULARIO POR MEDIO DE ESTE METODO QUE DECUELVE UN OBJETO CON LOS DATOSS
-        Arbitro arbitro = getDatosArbitro();
-        
-        em.getTransaction().begin();
-        em.persist(arbitro);
-        em.getTransaction().commit();
-        
-        setArbitroForm("","");
+        try {
+            //SE EXTRAEN LOS DATOS DEL FORMULARIO POR MEDIO DE ESTE METODO QUE DECUELVE UN OBJETO CON LOS DATOSS
+            Arbitro arbitro = getDatosArbitro();
 
-        JOptionPane.showMessageDialog(rootPane, "Guardado Exitoso");
+            em.getTransaction().begin();
+            em.persist(arbitro);
+            em.getTransaction().commit();
 
-        listarArbitros();
+            setArbitroForm("","");
+
+            JOptionPane.showMessageDialog(rootPane, "Guardado Exitoso");
+
+            listarArbitros();           
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(rootPane, e); 
+        }
+
     }//GEN-LAST:event_guardarMouseClicked
 
     private void actualizarMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_actualizarMouseClicked
-        // TODO add your handling code here:
-        
-        //SE TRAE EL ID DE LA FILA SELECCIONADA POR MEDIO DEL METODO
-        Object id = getFilaArbitro();
-        
-        Arbitro arbitro = em.find(Arbitro.class, id);
-        
-        Arbitro arbitroDatos = getDatosArbitro();
+        try {
+            //SE TRAE EL ID DE LA FILA SELECCIONADA POR MEDIO DEL METODO
+            Object id = getFilaArbitro();
 
-        //ENVIAMOS EL NUEVO VALOR AL OBJETO AARBITRO POR MEDIO DE SU SETTER
-        arbitro.setNombreArbitro(arbitroDatos.getNombreArbitro());
+            Arbitro arbitro = em.find(Arbitro.class, id);
 
-        em.getTransaction().begin();
-        em.persist(arbitro);
-        em.getTransaction().commit();
+            Arbitro arbitroDatos = getDatosArbitro();
 
-        //VACIAR LOS CAMPOS DEL FORMULARIO 
-        setArbitroForm("", "");
+            //ENVIAMOS EL NUEVO VALOR AL OBJETO AARBITRO POR MEDIO DE SU SETTER
+            arbitro.setNombreArbitro(arbitroDatos.getNombreArbitro());
 
-        idArbitroText.setEnabled(true);
-        
-        guardar.setEnabled(true);
-        borrar.setEnabled(false);
-        actualizar.setEnabled(false);
+            em.getTransaction().begin();
+            em.persist(arbitro);
+            em.getTransaction().commit();
 
-        JOptionPane.showMessageDialog(rootPane, "Actualizado Exitoso");
+            //VACIAR LOS CAMPOS DEL FORMULARIO 
+            setArbitroForm("", "");
 
-        listarArbitros();
+            idArbitroText.setEnabled(true);
+
+            guardar.setEnabled(true);
+            borrar.setEnabled(false);
+            actualizar.setEnabled(false);
+
+            JOptionPane.showMessageDialog(rootPane, "Actualizado Exitoso");
+
+            listarArbitros();
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(rootPane, e); 
+        }
     }//GEN-LAST:event_actualizarMouseClicked
 
     private void actualizarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_actualizarActionPerformed
@@ -268,31 +269,31 @@ public class VistaCargarArbitros extends javax.swing.JInternalFrame {
     }//GEN-LAST:event_actualizarActionPerformed
 
     private void borrarMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_borrarMouseClicked
-        // TODO add your handling code here:
-        
-        Object id = getFilaArbitro();
-        Arbitro arbitro = em.find(Arbitro.class, id);
-       
-        em.getTransaction().begin();
-        em.remove(arbitro);
-        em.getTransaction().commit();
+        try {
+            Object id = getFilaArbitro();
+            Arbitro arbitro = em.find(Arbitro.class, id);
 
-        JOptionPane.showMessageDialog(rootPane, "Borrado Exitoso");
+            em.getTransaction().begin();
+            em.remove(arbitro);
+            em.getTransaction().commit();
 
-        setArbitroForm("", "");
+            JOptionPane.showMessageDialog(rootPane, "Borrado Exitoso");
 
-        idArbitroText.setEnabled(true);
+            setArbitroForm("", "");
 
-        guardar.setEnabled(true);
-        borrar.setEnabled(false);
-        actualizar.setEnabled(false);
+            idArbitroText.setEnabled(true);
 
-        listarArbitros();
+            guardar.setEnabled(true);
+            borrar.setEnabled(false);
+            actualizar.setEnabled(false);
+
+            listarArbitros();
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(rootPane, e);
+        }
     }//GEN-LAST:event_borrarMouseClicked
 
     private void cancelarMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_cancelarMouseClicked
-        // TODO add your handling code here:
-
         //VACIAR LOS CAMPOS DEL FORMULARIO 
         setArbitroForm("", "");
 
@@ -306,20 +307,22 @@ public class VistaCargarArbitros extends javax.swing.JInternalFrame {
     }//GEN-LAST:event_cancelarMouseClicked
 
     private void tableArbitroMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_tableArbitroMouseClicked
-        // TODO add your handling code here:
-        idArbitroText.setEnabled(false);
-        
-        Object id = getFilaArbitro();
-        
+        try {
+            idArbitroText.setEnabled(false);
 
-        Arbitro arbitro = em.find(Arbitro.class, id);
-        
-        setArbitroForm(arbitro.getIdArbitro(),arbitro.getNombreArbitro());
+            Object id = getFilaArbitro();
 
-        guardar.setEnabled(false);
-        borrar.setEnabled(true);
-        actualizar.setEnabled(true);
 
+            Arbitro arbitro = em.find(Arbitro.class, id);
+
+            setArbitroForm(arbitro.getIdArbitro(),arbitro.getNombreArbitro());
+
+            guardar.setEnabled(false);
+            borrar.setEnabled(true);
+            actualizar.setEnabled(true);
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(rootPane, e);
+        }
     }//GEN-LAST:event_tableArbitroMouseClicked
 
 

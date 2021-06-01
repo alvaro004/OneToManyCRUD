@@ -35,41 +35,38 @@ public class VistaCargarEquipos extends javax.swing.JInternalFrame {
         
         TextPrompt placeholder1 = new TextPrompt("Ingrese el Id del Equipo", idEquipo);
         TextPrompt placeholder2 = new TextPrompt("Ingrese el nombre del Equipo", nombreEquipo);
-        
-        
+ 
         actualizar.setEnabled(false);
         borrar.setEnabled(false);
         
         listarEquipo();
- 
     }
     
     public void listarEquipo() {
-        
-        Query consultaPersona = em.createQuery("SELECT equipo1 FROM Equipo equipo1");
-        List<Equipo> ResultadosPersona = consultaPersona.getResultList();
-        DefaultTableModel modelo = (DefaultTableModel) tableEquipo.getModel();
-        modelo.setRowCount(0);
-        
-        for (Equipo e : ResultadosPersona) {
-            modelo.addRow(new Object[]{e.getIdEquipo(),e.getNombreEquipo(),});
-        }
+        try {
+            Query consultaPersona = em.createQuery("SELECT equipo1 FROM Equipo equipo1");
+            List<Equipo> ResultadosPersona = consultaPersona.getResultList();
+            DefaultTableModel modelo = (DefaultTableModel) tableEquipo.getModel();
+            modelo.setRowCount(0);
 
+            for (Equipo e : ResultadosPersona) {
+                modelo.addRow(new Object[]{e.getIdEquipo(),e.getNombreEquipo(),});
+            }
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(rootPane, e); 
+        }
     }
+    
     public Equipo getDatos(){
-        
-        
         String idequipo = idEquipo.getText();
         String nombre = nombreEquipo.getText();
         
         Equipo equipo = new Equipo(idequipo, nombre);
         
-    
         return equipo;
     }
     
     public void setForm(String idEquipo, String nombreEquipo){
-    
         this.idEquipo.setText(idEquipo);
         this.nombreEquipo.setText(nombreEquipo);
         
@@ -203,7 +200,7 @@ public class VistaCargarEquipos extends javax.swing.JInternalFrame {
         // TODO add your handling code here:
     }//GEN-LAST:event_actualizarActionPerformed
 
-            
+              
     private void guardarMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_guardarMouseClicked
         // TODO add your handling code here:
         try {                  
@@ -228,18 +225,23 @@ public class VistaCargarEquipos extends javax.swing.JInternalFrame {
     }//GEN-LAST:event_guardarMouseClicked
 
     private void tableEquipoMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_tableEquipoMouseClicked
-        idEquipo.setEnabled(false);
-        //SE BUSCA EL ID DE LA FILA SELECIONANDA LLAMANDO A ESTE METODO
-        Object id = getFilaTable();        
-        
-        Equipo equipo = em.find(Equipo.class, id);
-        
-        //ENVIAMOS LOS DATOS DE EQUIPO AL FORM
-        setForm(equipo.getIdEquipo(),equipo.getNombreEquipo());
-        
-        guardar.setEnabled(false);
-        borrar.setEnabled(true);
-        actualizar.setEnabled(true);
+        try {
+            idEquipo.setEnabled(false);
+            //SE BUSCA EL ID DE LA FILA SELECIONANDA LLAMANDO A ESTE METODO
+            Object id = getFilaTable();        
+
+            Equipo equipo = em.find(Equipo.class, id);
+
+            //ENVIAMOS LOS DATOS DE EQUIPO AL FORM
+            setForm(equipo.getIdEquipo(),equipo.getNombreEquipo());
+
+            guardar.setEnabled(false);
+            borrar.setEnabled(true);
+            actualizar.setEnabled(true);
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(rootPane, "NO se puede seleccionar la fila");           
+        }
+
     }//GEN-LAST:event_tableEquipoMouseClicked
 
     private void cancelarMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_cancelarMouseClicked
