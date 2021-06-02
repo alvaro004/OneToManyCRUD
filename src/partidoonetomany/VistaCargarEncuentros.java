@@ -36,12 +36,14 @@ public class VistaCargarEncuentros extends javax.swing.JInternalFrame {
         CargarArbitro();
         listarPartido();
         
+        TextPrompt placeholder1 = new TextPrompt("Ingrese el Id del Encuentro", idPartidoTxt);
+        TextPrompt placeholder2 = new TextPrompt("Ingrese la ronda del Encuentro", rondaPartidoTxt);
+        
         actualizar.setEnabled(false);
         borrar.setEnabled(false);
     }
     
-    public void CargarEquipo() {
-        
+    public void CargarEquipo() {        
         try {
             Query consultaEquipos = em.createQuery("SELECT equipo1 FROM Equipo equipo1");
             List<Equipo> ResultadosEquipo = consultaEquipos.getResultList();
@@ -50,16 +52,12 @@ public class VistaCargarEncuentros extends javax.swing.JInternalFrame {
                 localBox.addItem(e);
                 visitanteBox.addItem(e);
             }
-            
-
         } catch (Exception e) {
             System.err.println("ERROR AL INTENTAR LISTAR LOS EQUIPOS:" + e);
-        }
-        
+        }     
     }
     
-    public void CargarArbitro() {
-        
+    public void CargarArbitro() {   
         try {
             Query consultaArbitro = em.createQuery("SELECT arbitro FROM Arbitro arbitro");
             List<Arbitro> ResultadosArbitro = consultaArbitro.getResultList();
@@ -67,29 +65,64 @@ public class VistaCargarEncuentros extends javax.swing.JInternalFrame {
                 
                 arbitroBox.addItem(a);
             }
-            
-
         } catch (Exception e) {
             System.err.println("ERROR AL INTENTAR LISTAR LOS ARBITROS:" + e);
         }
-        
     }
     
     public void listarPartido() {
-        Query consultaPartido = em.createQuery("SELECT partido FROM Partido partido");
-        List<Partido> ResultadosPartido = consultaPartido.getResultList();
-        DefaultTableModel modelo = (DefaultTableModel) tablePartido.getModel();
-        modelo.setRowCount(0);
-        for (Partido p : ResultadosPartido) {
-            try {
-                modelo.addRow(new Object[]{p.getIdPartido(),p.getRonda(), p.getArbitro().getNombreArbitro() ,p.getLocal().getNombreEquipo(), p.getVisitante().getNombreEquipo()});
-            
-            } catch (Exception e) {
-                System.out.println(e);
-            }
-        }
+        try {
+            Query consultaPartido = em.createQuery("SELECT partido FROM Partido partido");
+            List<Partido> ResultadosPartido = consultaPartido.getResultList();
+            DefaultTableModel modelo = (DefaultTableModel) tablePartido.getModel();
+            modelo.setRowCount(0);
+            for (Partido p : ResultadosPartido) {
+                try {
+                    modelo.addRow(new Object[]{p.getIdPartido(),p.getRonda(), p.getArbitro().getNombreArbitro() ,p.getLocal().getNombreEquipo(), p.getVisitante().getNombreEquipo()});
 
+                } catch (Exception e) {
+                    System.out.println(e);
+                }
+            }
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(rootPane, e);            
+        }
     }
+    
+    public Partido getDatos(){
+        String idPartido = idPartidoTxt.getText();
+        String Ronda = rondaPartidoTxt.getText();
+        Arbitro arbitro = (Arbitro) arbitroBox.getSelectedItem();
+        Equipo equipoLocal = (Equipo) localBox.getSelectedItem();
+        Equipo equipoVisitante = (Equipo) visitanteBox.getSelectedItem();        
+
+        Partido partido = new Partido(idPartido, Ronda, equipoLocal, equipoVisitante, arbitro);
+        
+        return partido;
+    } 
+    
+    public void setForm(String idEncuentro, String rondaEncuentro){
+        idPartidoTxt.setText(idEncuentro);
+        rondaPartidoTxt.setText(rondaEncuentro); 
+        arbitroBox.setSelectedIndex(0);
+        localBox.setSelectedIndex(0);
+        visitanteBox.setSelectedIndex(0);
+        
+    }
+    
+    public void setFormBox(Arbitro arbitro, Equipo local, Equipo visitante){
+        arbitroBox.setSelectedItem(arbitro);
+        localBox.setSelectedItem(local);
+        visitanteBox.setSelectedItem(visitante);
+    }
+    
+    
+    public Object getFilaTable(){
+        int fila = tablePartido.getSelectedRow();
+        Object id = tablePartido.getValueAt(fila, 0);
+        return id;       
+    }    
+    
 
     /**
      * This method is called from within the constructor to initialize the form.
@@ -127,6 +160,7 @@ public class VistaCargarEncuentros extends javax.swing.JInternalFrame {
             }
         });
 
+        guardar.setBackground(new java.awt.Color(102, 255, 0));
         guardar.setText("Guardar");
         guardar.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
@@ -149,6 +183,7 @@ public class VistaCargarEncuentros extends javax.swing.JInternalFrame {
         });
         jScrollPane1.setViewportView(tablePartido);
 
+        actualizar.setBackground(new java.awt.Color(255, 255, 51));
         actualizar.setText("Actualizar");
         actualizar.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
@@ -156,6 +191,7 @@ public class VistaCargarEncuentros extends javax.swing.JInternalFrame {
             }
         });
 
+        borrar.setBackground(new java.awt.Color(255, 0, 51));
         borrar.setText("Borrar");
         borrar.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
@@ -163,6 +199,7 @@ public class VistaCargarEncuentros extends javax.swing.JInternalFrame {
             }
         });
 
+        cancelar.setBackground(new java.awt.Color(204, 204, 255));
         cancelar.setText("Cancelar");
         cancelar.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
@@ -176,47 +213,45 @@ public class VistaCargarEncuentros extends javax.swing.JInternalFrame {
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                        .addComponent(idPartidoTxt)
-                        .addComponent(rondaPartidoTxt, javax.swing.GroupLayout.DEFAULT_SIZE, 178, Short.MAX_VALUE)
-                        .addComponent(arbitroBox, javax.swing.GroupLayout.PREFERRED_SIZE, 170, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addComponent(localBox, javax.swing.GroupLayout.PREFERRED_SIZE, 170, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
-                        .addComponent(guardar, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(visitanteBox, javax.swing.GroupLayout.Alignment.LEADING, 0, 170, Short.MAX_VALUE))
-                    .addComponent(actualizar, javax.swing.GroupLayout.PREFERRED_SIZE, 170, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(borrar, javax.swing.GroupLayout.PREFERRED_SIZE, 170, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(cancelar, javax.swing.GroupLayout.PREFERRED_SIZE, 170, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 9, Short.MAX_VALUE)
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(11, Short.MAX_VALUE))
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                    .addComponent(cancelar, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(actualizar, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 222, Short.MAX_VALUE)
+                    .addComponent(guardar, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(rondaPartidoTxt, javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(idPartidoTxt, javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(visitanteBox, javax.swing.GroupLayout.Alignment.LEADING, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(arbitroBox, javax.swing.GroupLayout.Alignment.LEADING, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(localBox, javax.swing.GroupLayout.Alignment.LEADING, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(borrar, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addGap(18, 18, 18)
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 639, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addGap(29, 29, 29)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(idPartidoTxt, javax.swing.GroupLayout.PREFERRED_SIZE, 34, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addComponent(rondaPartidoTxt, javax.swing.GroupLayout.PREFERRED_SIZE, 34, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(18, 18, 18)
+                        .addGap(11, 11, 11)
                         .addComponent(arbitroBox, javax.swing.GroupLayout.PREFERRED_SIZE, 32, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(18, 18, 18)
-                        .addComponent(localBox, javax.swing.GroupLayout.PREFERRED_SIZE, 34, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(18, 18, 18)
-                        .addComponent(visitanteBox, javax.swing.GroupLayout.PREFERRED_SIZE, 34, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(18, 18, 18)
-                        .addComponent(guardar, javax.swing.GroupLayout.PREFERRED_SIZE, 38, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(localBox, javax.swing.GroupLayout.PREFERRED_SIZE, 34, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(visitanteBox, javax.swing.GroupLayout.PREFERRED_SIZE, 34, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 8, Short.MAX_VALUE)
+                        .addComponent(guardar, javax.swing.GroupLayout.PREFERRED_SIZE, 38, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 8, Short.MAX_VALUE)
                         .addComponent(actualizar, javax.swing.GroupLayout.PREFERRED_SIZE, 38, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addComponent(borrar, javax.swing.GroupLayout.PREFERRED_SIZE, 38, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(cancelar, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                        .addGap(18, 18, 18)
+                        .addComponent(cancelar, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE))
+                .addGap(38, 38, 38))
         );
 
         pack();
@@ -231,149 +266,108 @@ public class VistaCargarEncuentros extends javax.swing.JInternalFrame {
     }//GEN-LAST:event_visitanteBoxActionPerformed
 
     private void guardarMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_guardarMouseClicked
-        // TODO add your handling code here:
-        
         try {
-            String idPartido = idPartidoTxt.getText();
-            String Ronda = rondaPartidoTxt.getText();
-            Arbitro arbitro = (Arbitro) arbitroBox.getSelectedItem();
-            Equipo equipoLocal = (Equipo) localBox.getSelectedItem();
-            Equipo equipoVisitante = (Equipo) visitanteBox.getSelectedItem();
-            
-            Partido partido = new Partido(idPartido, Ronda, equipoLocal, equipoVisitante, arbitro);
+            Partido partido = getDatos();
             
             em.getTransaction().begin();
             em.persist(partido);
             em.getTransaction().commit();
             
             JOptionPane.showMessageDialog(rootPane, "Guardado Exitoso");    
-            
-            idPartidoTxt.setText("");
-            rondaPartidoTxt.setText("");
+            //VACIAMOS EL FORMULARIO    
+            setForm("","");
             
             listarPartido();
-
-
-            
+         
         } catch (Exception e) {
-            System.out.println(e);
+            JOptionPane.showMessageDialog(rootPane, "Error al Guardar"); 
         }
     }//GEN-LAST:event_guardarMouseClicked
 
     private void tablePartidoMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_tablePartidoMouseClicked
-        // TODO add your handling code here:
-        int fila = tablePartido.getSelectedRow();
-        Object id = tablePartido.getValueAt(fila, 0);       
-        
-        Partido partido = em.find(Partido.class, id);
-        
-        idPartidoTxt.setEnabled(false);
-        
-        String idPartido = partido.getIdPartido();
-        String rondaPartido = partido.getRonda();
-        Arbitro arbitro = (Arbitro) partido.arbitro;
-        Equipo equipoLocal = (Equipo) partido.Local;
-        Equipo equipoVisitante = (Equipo) partido.Visitante;
+        try {
+            idPartidoTxt.setEnabled(false);
+            //SE BUSCA EL ID DE LA FILA SELECIONANDA LLAMANDO A ESTE METODO
+            Object id = getFilaTable();
 
-        
-        idPartidoTxt.setText(idPartido);
-        rondaPartidoTxt.setText(rondaPartido);
-        arbitroBox.setSelectedItem(arbitro);
-        localBox.setSelectedItem(equipoLocal);
-        visitanteBox.setSelectedItem(equipoVisitante);
-        
-        guardar.setEnabled(false);
-        borrar.setEnabled(true);
-        actualizar.setEnabled(true);
-        
-        
+            Partido partido = em.find(Partido.class, id);
+
+            //ENVIAMOS LOS DATOS DE EQUIPO AL FORM
+            setForm(partido.getIdPartido(), partido.getRonda());
+            setFormBox(partido.getArbitro(), partido.getLocal(), partido.getVisitante());
+
+            guardar.setEnabled(false);
+            borrar.setEnabled(true);
+            actualizar.setEnabled(true);
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(rootPane, "NO se puede seleccionar la fila");           
+        }      
     }//GEN-LAST:event_tablePartidoMouseClicked
 
     private void actualizarMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_actualizarMouseClicked
-        // TODO add your handling code here:
-        
-        int fila = tablePartido.getSelectedRow();
-        Object id = tablePartido.getValueAt(fila, 0);   
-        
-        Partido partido = em.find(Partido.class, id);
-        
-        
-        String idPartido = idPartidoTxt.getText();
-        String Ronda = rondaPartidoTxt.getText();
-        Arbitro arbitro = (Arbitro) arbitroBox.getSelectedItem();
-        Equipo equipoLocal = (Equipo) localBox.getSelectedItem();
-        Equipo equipoVisitante = (Equipo) visitanteBox.getSelectedItem();
-        
-        partido.setIdPartido(idPartido);
-        partido.setRonda(Ronda);
-        partido.setArbitro(arbitro);
-        partido.setLocal(equipoLocal);
-        partido.setVisitante(equipoVisitante);
-        
-        em.getTransaction().begin();
-        em.persist(partido);
-        em.getTransaction().commit();        
+        try {
+            //SE BUSCA EL ID DE LA FILA SELECIONANDA LLAMANDO A ESTE METODO
+            Object id = getFilaTable();
+            //SE ENCUENTRA EL OBJETO DESEADO Y SE GUARDA EN EL TIPO DE DATO DEL OBJETO
+            Partido partido = em.find(Partido.class, id);
+            //SE TRAEN LOS DATOS DEL FORMULARIO Y SE GUARDAN EN UN OBJETO DEL MISMO TIPO
+            Partido partido1 = getDatos();
+            //SE ENVIAN LOS DATOS CAMBIADOS DEL OBJETO PARTIDO1 AL OBJETO PARTIDO
+            partido.setRonda(partido1.getRonda());
+            partido.setArbitro(partido1.getArbitro());
+            partido.setLocal(partido1.getLocal());
+            partido.setVisitante(partido1.getVisitante());
 
-        JOptionPane.showMessageDialog(rootPane, "Actualizado Exitoso");          
-        listarPartido();
+            em.getTransaction().begin();
+            em.persist(partido);
+            em.getTransaction().commit();        
 
-        
-        
-        idPartidoTxt.setText("");
-        rondaPartidoTxt.setText("");
-        arbitroBox.setSelectedIndex(0);
-        localBox.setSelectedIndex(0);
-        visitanteBox.setSelectedIndex(0);        
+            JOptionPane.showMessageDialog(rootPane, "Actualizado Exitoso");          
+            listarPartido();
 
-        idPartidoTxt.setEnabled(true);
-        
-        guardar.setEnabled(true);
-        borrar.setEnabled(false);
-        actualizar.setEnabled(false);
-        
+            //VACIAMOS EL FORM
+            setForm("", "");        
+
+            idPartidoTxt.setEnabled(true);       
+            guardar.setEnabled(true);
+            borrar.setEnabled(false);
+            actualizar.setEnabled(false);
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(rootPane, "Error al Actualizar: ");
+        }   
     }//GEN-LAST:event_actualizarMouseClicked
 
     private void borrarMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_borrarMouseClicked
-        // TODO add your handling code here:
-        
-        int fila = tablePartido.getSelectedRow();
-        Object id = tablePartido.getValueAt(fila, 0);   
-        
-        Partido partido = em.find(Partido.class, id);       
-        em.getTransaction().begin();
-        em.remove(partido);
-        em.getTransaction().commit();
+        try {
+            Object id = getFilaTable();
+            Partido partido = em.find(Partido.class, id);       
+            em.getTransaction().begin();
+            em.remove(partido);
+            em.getTransaction().commit();
 
-        JOptionPane.showMessageDialog(rootPane, "Borrado Exitoso");
-        
-        idPartidoTxt.setText("");
-        rondaPartidoTxt.setText("");
-        arbitroBox.setSelectedIndex(0);
-        localBox.setSelectedIndex(0);
-        visitanteBox.setSelectedIndex(0);        
+            //VACIAMOS LOS CAMPOS
+            setForm("", "");        
 
-        idPartidoTxt.setEnabled(true);
-        guardar.setEnabled(true);
-        borrar.setEnabled(false);
-        actualizar.setEnabled(false);
-        listarPartido();
+            JOptionPane.showMessageDialog(rootPane, "Borrado Exitoso");
+            idPartidoTxt.setEnabled(true);
+            guardar.setEnabled(true);
+            borrar.setEnabled(false);
+            actualizar.setEnabled(false);
+            listarPartido();
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(rootPane, "Error al Borrar: ");
+        }
+  
     }//GEN-LAST:event_borrarMouseClicked
 
     private void cancelarMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_cancelarMouseClicked
-        // TODO add your handling code here:
-        idPartidoTxt.setText("");
-        rondaPartidoTxt.setText("");
-        arbitroBox.setSelectedIndex(0);
-        localBox.setSelectedIndex(0);
-        visitanteBox.setSelectedIndex(0);        
-
+        //VACIAMOS LOS CAMPOS
+        setForm("", "");
+        
         idPartidoTxt.setEnabled(true);
-
         guardar.setEnabled(true);
         borrar.setEnabled(false);
         actualizar.setEnabled(false);
-        
-        listarPartido();
     }//GEN-LAST:event_cancelarMouseClicked
 
 
